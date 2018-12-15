@@ -2,9 +2,20 @@ const express = require('express');
 const app = express();
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
 const taskRoutes = require('./api/routes/tasks');
 const listRoutes = require('./api/routes/lists');
+
+mongoose.connect(
+    'mongodb+srv://' +
+    process.env.DB_USER +
+    process.env.DB_PASSWORD +
+    process.env.DATABASE,
+    {
+    useNewUrlParser: true
+    }
+);
 
 // Logging
 app.use(morgan('dev'));
