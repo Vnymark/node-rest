@@ -7,11 +7,24 @@ const Task = require('../models/task');
 // Returns all tasks
 router.get('/', (req, res, next) => {
     Task.find()
+        .select('_id, name')
         .exec()
         .then(docs => {
-            console.log(docs);
+            const response = {
+                count: docs.length,
+                tasks: docs.map(doc => {
+                    return {
+                        _id: doc._id,
+                        name: doc.name,
+                        request: {
+                            type: 'GET',
+                            url: 'http://localhost:3000/' + 'tasks/' + doc._id
+                        }
+                    }
+                })
+            };
             if (docs.length >= 1){
-                res.status(200).json(docs)
+                res.status(200).json(response)
             } else {
                 res.status(404).json({message: 'No tasks found.'})
             }
@@ -37,7 +50,16 @@ router.post('/', (req, res, next) => {
             console.log(result);
             res.status(201).json({
                 message: 'Task was created',
-                createdTask: task
+                createdTask: {
+                    _id: result._id,
+                    name: result.name,
+                    info: result.info,
+                    active: result.active,
+                    request: {
+                        type: 'GET',
+                        url: 'http://localhost:3000/' + 'tasks/' + result._id
+                    }
+                }
             });
         })
         .catch(err => {
@@ -50,11 +72,23 @@ router.post('/', (req, res, next) => {
 router.get('/:taskId', (req, res, next) => {
     const id = req.params.taskId;
     Task.findById(id)
+        .select('_id, name, info, active')
         .exec()
         .then(doc => {
-            console.log(doc);
             if (doc) {
-                res.status(200).json(doc)
+                res.status(200).json({
+                    message: 'Task found for provided ID:',
+                    task: {
+                        _id: doc._id,
+                        name: doc.name,
+                        info: doc.info,
+                        active: doc.active,
+                        request: {
+                            type: 'GET',
+                            url: 'http://localhost:3000/' + 'tasks/'
+                        }
+                    }
+                })
             } else {
                 res.status(404).json({message: 'No task found for provided ID.'})
             }
@@ -75,8 +109,19 @@ router.patch('/:taskId', (req, res, next) => {
     Task.update({_id: id}, { $set: updateOps})
         .exec()
         .then(result => {
-            console.log(result);
-            res.status(200).json(result);
+            res.status(200).json({
+                message: 'Updated task successfully.',
+                task: {
+                    _id: result._id,
+                    name: result.name,
+                    info: result.info,
+                    active: result.active,
+                    request: {
+                        type: 'GET',
+                        url: 'http://localhost:3000/' + 'tasks/'
+                    }
+                }
+            });
         })
         .catch(err => {
             console.log(err);
@@ -90,7 +135,13 @@ router.delete('/:taskId', (req, res, next) => {
     Task.deleteOne({_id: id})
         .exec()
         .then(result => {
-            res.status(200).json(result)
+            res.status(200).json({
+                message: 'Deleted task successfully',
+                request: {
+                    type: 'GET',
+                    url: 'http://localhost:3000/' + 'tasks/'
+                }
+            });
         })
         .catch(err => {
             console.log(err);
