@@ -10,8 +10,13 @@ router.get('/', (req, res, next) => {
 
 // Handle POST requests to /tasks
 router.post('/', (req, res, next) => {
+    const task = {
+        name: req.body.name,
+        info: req.body.info
+    };
     res.status(201).json({
-        message: 'Task was created'
+        message: 'Task was created',
+        createdTask: task
     });
 });
 

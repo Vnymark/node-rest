@@ -10,6 +10,10 @@ router.get('/', (req, res, next) => {
 
 // Handles POST requests to /lists
 router.post('/', (req, res, next) => {
+    const list = {
+        listName: req.body.listName,
+        taskId: req.body.taskId
+    };
     res.status(201).json({
         message: 'List was created'
     });
