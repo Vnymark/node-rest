@@ -1,188 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const mongoose = require('mongoose');
 const checkAuth = require('../authentication/check-auth');
-
-const Task = require('../models/task');
-const List = require('../models/list');
+const TasksController = require ('../controllers/tasks');
 
 // Returns all tasks
-router.get('/', checkAuth, (req, res, next) => {
-    Task.find()
-        .select('_id, name')
-        .exec()
-        .then(docs => {
-            const response = {
-                count: docs.length,
-                tasks: docs.map(doc => {
-                    return {
-                        _id: doc._id,
-                        name: doc.name,
-                        request: {
-                            type: 'GET',
-                            url: 'http://localhost:3000/' + 'tasks/' + doc._id
-                        }
-                    }
-                })
-            };
-            if (docs.length >= 1){
-                res.status(200).json(response)
-            } else {
-                res.status(404).json({message: 'No tasks found.'})
-            }
-        })
-        .catch(err => {
-            res.status(500).json({
-                error: err
-            });
-        });
-});
+router.get('/', checkAuth, TasksController.tasks_fetchAll);
 
 // Creates a new task
-router.post('/', checkAuth, (req, res, next) => {
-    List.findById(req.body.list)
-        .then(list => {
-            if (!list) {
-                return res.status(404).json({
-                    message: 'List not found.'
-                });
-            }
-            const task = new Task({
-                _id: new mongoose.Types.ObjectId(),
-                name: req.body.name,
-                info: req.body.info,
-                list: req.body.list,
-                active: true
-            });
-            return task.save();
-        })
-        .then(result => {
-            console.log(result);
-            res.status(201).json({
-                message: 'Task was created',
-                createdTask: {
-                    _id: result._id,
-                    name: result.name,
-                    info: result.info,
-                    list: result.list,
-                    active: result.active
-                }, request: {
-                    type: 'GET',
-                    url: 'http://localhost:3000/' + 'tasks/' + result._id
-                }
-            });
-        })
-        .catch(err => {
-            console.log(err.message);
-            res.status(500).json({
-                error: err
-            });
-        });
-
-});
+router.post('/', checkAuth, TasksController.tasks_createOne);
 
 // Fetches a task by ID
-router.get('/:taskId', checkAuth, (req, res, next) => {
-    Task.findById(req.params.taskId)
-        .select('_id, name, info, active')
-        .exec()
-        .then(doc => {
-            if (doc) {
-                res.status(200).json({
-                    message: 'Task found for provided ID:',
-                    task: {
-                        _id: doc._id,
-                        name: doc.name,
-                        info: doc.info,
-                        list: doc.list,
-                        active: doc.active
-                    }, request: {
-                        type: 'GET',
-                        url: 'http://localhost:3000/' + 'tasks/'
-                    }
-                })
-            } else {
-                return res.status(404).json({
-                    message: 'No task found for provided ID.'
-                })
-            }
-        })
-        .catch(err => {
-            console.log(err.message);
-            res.status(500).json({
-                error: err
-            });
-        });
-});
+router.get('/:taskId', checkAuth, TasksController.tasks_fetchById);
 
 // Updates one property on a specific task
-router.patch('/:taskId', checkAuth, (req, res, next) => {
-    const updateOps = {};
-    for (const ops of req.body) {
-        updateOps[ops.propName] = ops.value;
-    }
-    Task.findById(req.params.taskId)
-        .then(doc => {
-            if (doc < 1) {
-                res.status(404).json({
-                    message: 'Task not found!'
-                })
-            } else {
-                Task.updateOne({_id: req.params.taskId}, { $set: updateOps})
-                    .exec()
-                    .then(result => {
-                        res.status(200).json({
-                            message: 'Updated task successfully.',
-                            task: {
-                                _id: result._id,
-                                name: result.name,
-                                info: result.info,
-                                list: result.list,
-                                active: result.active
-                            }, request: {
-                                type: 'GET',
-                                url: 'http://localhost:3000/' + 'tasks/'
-                            }
-                        });
-                    })
-            }
-        })
-        .catch(err => {
-            console.log(err.message);
-            res.status(500).json({
-                error: err
-            })
-        });
-});
+router.patch('/:taskId', checkAuth, TasksController.tasks_updateOne);
 
 // Deletes one task by ID
-router.delete('/:taskId', checkAuth, (req, res, next) => {
-    Task.findById(req.params.taskId)
-        .then(doc => {
-            if (doc < 1) {
-                res.status(404).json({
-                    message: 'Task not found!'
-                })
-            } else {
-                Task.deleteOne({_id: req.params.taskId})
-                    .exec()
-                    .then(result => {
-                        res.status(200).json({
-                            message: 'Task deleted successfully',
-                            request: {
-                                type: 'GET',
-                                url: 'http://localhost:3000/' + 'tasks/'
-                            }
-                        });
-                    })
-            }
-        })
-        .catch(err => {
-            console.log(err.message);
-            res.status(500).json({
-                error: err
-            });
-        });
-});
+router.delete('/:taskId', checkAuth, TasksController.tasks_delete);
 
 module.exports = router;
