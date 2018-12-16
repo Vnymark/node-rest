@@ -17,6 +17,8 @@ mongoose.connect(
     useNewUrlParser: true
     }
 );
+// To get rid of deprecated ensureIndex warning.
+mongoose.set('useCreateIndex', true);
 
 // Logging
 app.use(morgan('dev'));

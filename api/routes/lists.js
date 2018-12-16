@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const checkAuth = require('../authentication/check-auth');
 
 const List = require('../models/list');
 
 // Fetches all lists
-router.get('/', (req, res, next) => {
+router.get('/', checkAuth, (req, res, next) => {
     List.find()
         .select('_id, name')
         .exec()
@@ -37,7 +38,7 @@ router.get('/', (req, res, next) => {
 });
 
 // Creates a new list
-router.post('/', (req, res, next) => {
+router.post('/', checkAuth, (req, res, next) => {
     const list = new List({
         _id: mongoose.Types.ObjectId(),
         name: req.body.name,
@@ -69,7 +70,7 @@ router.post('/', (req, res, next) => {
 });
 
 // Fetches a list by ID
-router.get('/:listId', (req, res, next) => {
+router.get('/:listId', checkAuth, (req, res, next) => {
     List.findById(req.params.listId)
         .select('_id, name, user, active')
         .exec()
@@ -101,7 +102,7 @@ router.get('/:listId', (req, res, next) => {
 });
 
 // Updates one property on a specific task
-router.patch('/:listId', (req, res, next) => {
+router.patch('/:listId', checkAuth, (req, res, next) => {
     const updateOps = {};
     for (const ops of req.body) {
         updateOps[ops.propName] = ops.value;
@@ -141,7 +142,7 @@ router.patch('/:listId', (req, res, next) => {
 });
 
 // Deletes one list by ID
-router.delete('/:listId', (req, res, next) => {
+router.delete('/:listId', checkAuth, (req, res, next) => {
     List.findById(req.params.listId)
         .then(doc => {
             if (doc < 1) {

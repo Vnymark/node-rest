@@ -3,6 +3,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const checkAuth = require('../authentication/check-auth');
 
 const User = require('../models/user');
 
@@ -93,7 +94,7 @@ router.post('/login', (req, res, next) => {
         });
 });
 
-router.delete('/:userId', (req, res, next) => {
+router.delete('/:userId', checkAuth, (req, res, next) => {
     User.findById(req.params.userId)
         .then(doc => {
             if (doc < 1) {

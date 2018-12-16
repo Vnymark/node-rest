@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const checkAuth = require('../authentication/check-auth');
 
 const Task = require('../models/task');
 const List = require('../models/list');
 
 // Returns all tasks
-router.get('/', (req, res, next) => {
+router.get('/', checkAuth, (req, res, next) => {
     Task.find()
         .select('_id, name')
         .exec()
@@ -38,7 +39,7 @@ router.get('/', (req, res, next) => {
 });
 
 // Creates a new task
-router.post('/', (req, res, next) => {
+router.post('/', checkAuth, (req, res, next) => {
     List.findById(req.body.list)
         .then(list => {
             if (!list) {
@@ -81,7 +82,7 @@ router.post('/', (req, res, next) => {
 });
 
 // Fetches a task by ID
-router.get('/:taskId', (req, res, next) => {
+router.get('/:taskId', checkAuth, (req, res, next) => {
     Task.findById(req.params.taskId)
         .select('_id, name, info, active')
         .exec()
@@ -93,6 +94,7 @@ router.get('/:taskId', (req, res, next) => {
                         _id: doc._id,
                         name: doc.name,
                         info: doc.info,
+                        list: doc.list,
                         active: doc.active
                     }, request: {
                         type: 'GET',
@@ -114,7 +116,7 @@ router.get('/:taskId', (req, res, next) => {
 });
 
 // Updates one property on a specific task
-router.patch('/:taskId', (req, res, next) => {
+router.patch('/:taskId', checkAuth, (req, res, next) => {
     const updateOps = {};
     for (const ops of req.body) {
         updateOps[ops.propName] = ops.value;
@@ -135,6 +137,7 @@ router.patch('/:taskId', (req, res, next) => {
                                 _id: result._id,
                                 name: result.name,
                                 info: result.info,
+                                list: result.list,
                                 active: result.active
                             }, request: {
                                 type: 'GET',
@@ -153,7 +156,7 @@ router.patch('/:taskId', (req, res, next) => {
 });
 
 // Deletes one task by ID
-router.delete('/:taskId', (req, res, next) => {
+router.delete('/:taskId', checkAuth, (req, res, next) => {
     Task.findById(req.params.taskId)
         .then(doc => {
             if (doc < 1) {
