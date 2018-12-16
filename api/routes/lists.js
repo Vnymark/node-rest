@@ -153,7 +153,7 @@ router.delete('/:listId', (req, res, next) => {
                     .exec()
                     .then(result => {
                         res.status(200).json({
-                            message: 'Deleted list successfully',
+                            message: 'List deleted successfully',
                             request: {
                                 type: 'GET',
                                 url: 'http://localhost:3000/' + 'lists/'

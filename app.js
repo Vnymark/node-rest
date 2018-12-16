@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 
 const taskRoutes = require('./api/routes/tasks');
 const listRoutes = require('./api/routes/lists');
+const userRoutes = require('./api/routes/users');
 
 mongoose.connect(
     'mongodb+srv://' +
@@ -40,6 +41,7 @@ app.use((req, res, next) => {
 // Routes which should handle valid requests
 app.use('/tasks', taskRoutes);
 app.use('/lists', listRoutes);
+app.use('/users', userRoutes);
 
 // Error handling for unknown request
 app.use((req, res, next) => {

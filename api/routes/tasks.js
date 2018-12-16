@@ -165,7 +165,7 @@ router.delete('/:taskId', (req, res, next) => {
                     .exec()
                     .then(result => {
                         res.status(200).json({
-                            message: 'Deleted task successfully',
+                            message: 'Task deleted successfully',
                             request: {
                                 type: 'GET',
                                 url: 'http://localhost:3000/' + 'tasks/'
